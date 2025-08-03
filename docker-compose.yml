@@ -1,24 +1,48 @@
-version: '3.11'
+version: '3.8'
+
 services:
+  # FastAPI application service
   fastapi:
     build:
       context: .
       dockerfile: Dockerfile.fastapi
     ports:
-      - "8000:8000"
-    env_file:
-      - .env
+      - "8001:8001"  # Match the port we've been using
+    environment:
+      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
+      - LOG_LEVEL=INFO
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=data/stock_data.duckdb
+    volumes:
+      - ./data:/app/data  # Persist database files
+      - ./exports:/app/exports  # Persist export files
     depends_on:
       - redis
-  streamlit:
-    build:
-      context: .
-      dockerfile: Dockerfile.streamlit
-    ports:
-      - "8501:8501"
-    depends_on:
-      - fastapi
+    networks:
+      - stock-index-network
+    restart: unless-stopped
+
+  # Redis cache service
   redis:
-    image: redis:7
+    image: redis:7-alpine
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - stock-index-network
+    restart: unless-stopped
+
+  # Database service (DuckDB runs embedded, but we can add monitoring)
+  # Note: DuckDB is embedded, so no separate database container needed
+  # The database file is stored in the data volume
+
+# Named volumes for data persistence
+volumes:
+  redis_data:
+    driver: local
+
+# Custom network for service communication
+networks:
+  stock-index-network:
+    driver: bridge
