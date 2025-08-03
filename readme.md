@@ -1,101 +1,389 @@
 # Equal-Weighted Stock Index Service
 
-## Stage 0 Setup
+A comprehensive backend service for tracking and managing a custom equal-weighted stock index comprising the top US stocks by daily market capitalization.
 
-### Requirements
-- Python 3.11+
-- Docker & docker-compose
-- Git
+## 🎯 Features
 
-### Quickstart (local)
+- **Dynamic Index Construction**: Build equal-weighted indices from top stocks by market cap
+- **Historical Performance Tracking**: Calculate and store daily returns and cumulative performance
+- **Composition Change Detection**: Track when stocks enter or exit the index
+- **Data Export**: Export comprehensive data to Excel files with multiple sheets
+- **Caching**: Redis-based caching for improved API performance
+- **Multiple Data Sources**: Support for Yahoo Finance and Alpha Vantage APIs
+- **Containerization**: Full Docker support with docker-compose
+
+## 🏗️ Architecture
+
+```
+stock-index-app/
+├── app/backend/           # FastAPI application
+│   ├── main.py           # FastAPI app entry point
+│   ├── routers/          # API route definitions
+│   ├── services/         # Business logic layer
+│   ├── db/              # Database operations
+│   ├── models/          # Pydantic data models
+│   └── schemas/         # API request/response schemas
+├── src/                 # Core utilities
+│   ├── config.py        # Configuration management
+│   ├── logger.py        # Logging utilities
+│   ├── retry.py         # Retry mechanism
+│   └── sources/         # Data source implementations
+├── tests/               # Unit tests
+├── data/                # Data storage
+├── exports/             # Excel export files
+└── docker-compose.yml   # Container orchestration
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.9+
+- Docker and Docker Compose (for containerized setup)
+- Alpha Vantage API key (free at [alphavantage.co](https://www.alphavantage.co/))
+
+### Local Development Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd stock-index-app
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set environment variables**
+   ```bash
+   export ALPHA_VANTAGE_API_KEY="your_api_key_here"
+   export LOG_LEVEL="INFO"
+   ```
+
+5. **Start Redis** (for caching)
+   ```bash
+   docker run -d -p 6379:6379 redis:alpine
+   ```
+
+6. **Run the application**
+   ```bash
+   uvicorn app.backend.main:app --host 0.0.0.0 --port 8001 --reload
+   ```
+
+7. **Access the API**
+   - API Documentation: http://localhost:8001/docs
+   - Health Check: http://localhost:8001/health
+
+### Docker Setup
+
+1. **Set up environment variables**
+   ```bash
+   # Copy the example environment file
+   cp env.example .env
+   
+   # Edit .env and add your Alpha Vantage API key
+   # ALPHA_VANTAGE_API_KEY=your_api_key_here
+   ```
+
+2. **Build and run with Docker Compose**
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the application**
+   - API: http://localhost:8001
+   - Documentation: http://localhost:8001/docs
+   - Health Check: http://localhost:8001/health
+
+4. **Test the containerized application**
+   ```bash
+   python3 test_docker.py
+   ```
+
+5. **Stop the services**
+   ```bash
+   docker-compose down
+   ```
+
+## 📊 API Endpoints
+
+### 1. Build Index
+```http
+POST /api/v1/build-index
+Content-Type: application/json
+
+{
+  "start_date": "2024-12-16",
+  "end_date": "2024-12-16",
+  "top_n": 100
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "date_range": "2024-12-16 to 2024-12-16",
+  "total_dates_processed": 1,
+  "total_compositions_built": 1,
+  "total_performance_calculated": 1,
+  "top_n": 100
+}
+```
+
+### 2. Get Index Composition
+```http
+GET /api/v1/index-composition?date=2024-12-16
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "date": "2024-12-16",
+  "total_stocks": 100,
+  "equal_weight": 0.01,
+  "stocks": [
+    {
+      "symbol": "AAPL",
+      "weight": 0.01,
+      "market_cap": 3000000000000,
+      "rank": 1
+    }
+  ]
+}
+```
+
+### 3. Get Index Performance
+```http
+GET /api/v1/index-performance?start_date=2024-12-16&end_date=2024-12-16
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "start_date": "2024-12-16",
+  "end_date": "2024-12-16",
+  "total_return": 1.0,
+  "daily_returns": [
+    {
+      "date": "2024-12-16",
+      "daily_return": 1.0,
+      "cumulative_return": 1.0,
+      "index_value": 101.0
+    }
+  ]
+}
+```
+
+### 4. Get Composition Changes
+```http
+GET /api/v1/composition-changes?start_date=2024-12-16&end_date=2024-12-16
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "start_date": "2024-12-16",
+  "end_date": "2024-12-16",
+  "total_changes": 0,
+  "changes": []
+}
+```
+
+### 5. Export Data
+```http
+POST /api/v1/export-data
+Content-Type: application/json
+
+{
+  "start_date": "2024-12-16",
+  "end_date": "2024-12-16",
+  "include_performance": true,
+  "include_compositions": true,
+  "include_changes": true
+}
+```
+
+**Response:**
+```json
+{
+  "file_url": "/api/v1/download/index_data_2024-12-16_to_2024-12-16.xlsx",
+  "file_size": 6588,
+  "export_date": "2024-12-16T10:30:00"
+}
+```
+
+## 🗄️ Database Schema
+
+### Tables
+
+1. **stock_metadata**
+   - `symbol` (PRIMARY KEY): Stock symbol
+   - `name`: Company name
+   - `exchange`: Stock exchange
+   - `latest_market_cap`: Latest market capitalization
+   - `last_updated`: Last update timestamp
+
+2. **daily_stock_data**
+   - `symbol`: Stock symbol
+   - `date`: Trading date
+   - `close_price`: Closing price
+   - `market_cap`: Market capitalization
+   - `source`: Data source (yahoo/alphavantage)
+   - `error`: Error message if any
+
+3. **index_compositions**
+   - `id`: Unique identifier
+   - `date`: Index date
+   - `symbol`: Stock symbol
+   - `weight`: Equal weight in index
+   - `market_cap`: Market capitalization
+   - `rank`: Market cap rank
+
+4. **index_performance**
+   - `id`: Unique identifier
+   - `date`: Performance date
+   - `daily_return`: Daily return percentage
+   - `cumulative_return`: Cumulative return percentage
+   - `index_value`: Index value
+
+5. **composition_changes**
+   - `id`: Unique identifier
+   - `date`: Change date
+   - `symbol`: Stock symbol
+   - `action`: entered/exited
+   - `previous_rank`: Previous rank
+   - `new_rank`: New rank
+   - `market_cap`: Market capitalization
+
+## 🧪 Testing
+
+### Run Unit Tests
 ```bash
-source .venv/bin/activate
-uvicorn app.backend.main:app --reload
-streamlit run streamlit_app/ui.py
+python -m pytest tests/ -v
 ```
 
----
-
-## Dockerized Setup
-
-### 1. Build and start all components
+### Run Integration Tests
 ```bash
-docker-compose up --build
+python test_real_data.py
 ```
 
-### 2. Access the services
-- FastAPI: http://localhost:8000/health
-- Streamlit: http://localhost:8501/
-- Redis: localhost:6379
-
-### 3. Stopping all services
+### Test API Endpoints
 ```bash
-docker-compose down
+# Test all endpoints
+curl -X POST "http://localhost:8001/api/v1/build-index" \
+  -H "Content-Type: application/json" \
+  -d '{"start_date": "2024-12-16", "end_date": "2024-12-16", "top_n": 2}'
+
+curl "http://localhost:8001/api/v1/index-composition?date=2024-12-16"
+
+curl "http://localhost:8001/api/v1/index-performance?start_date=2024-12-16&end_date=2024-12-16"
 ```
 
-### Notes
-- Ensure `.env` is present in the project root for FastAPI config.
-- All dependencies from `requirements.txt` are installed in both containers.
-- Redis data is ephemeral unless you add a volume.
+## 🔧 Configuration
 
----
+### Environment Variables
 
-## Data Sources and Ingestion Strategy
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ALPHA_VANTAGE_API_KEY` | Alpha Vantage API key | Required |
+| `LOG_LEVEL` | Logging level | INFO |
+| `DATABASE_URL` | Database file path | stock_data.duckdb |
+| `REDIS_URL` | Redis connection URL | redis://localhost:6379/0 |
 
-### Data Sources
+### Configuration File
 
-This project uses two sources for historical stock price data:
+The application uses `src/config.py` for centralized configuration management with Pydantic settings.
 
-1. **Yahoo Finance (`yfinance` Python library)**
-   - **Ease of Use:** Simple Python API, no API key required.
-   - **Rate Limits:** Generous for most use cases, but undocumented and subject to change.
-   - **Coverage:** Wide coverage of US and global equities.
-   - **Reliability:** Generally reliable, but may occasionally miss data for certain dates or symbols.
+## 📈 Data Sources
 
-2. **Alpha Vantage (TIME_SERIES_DAILY endpoint)**
-   - **Ease of Use:** Requires free API key, simple REST API.
-   - **Rate Limits:** Strict (5 requests/minute, 500 requests/day for free tier).
-   - **Coverage:** Good coverage of major equities, but some symbols may be missing.
-   - **Reliability:** Reliable for supported symbols, but subject to rate limits and API downtime.
+### Yahoo Finance
+- **Library**: yfinance
+- **Features**: Stock prices, market capitalization
+- **Rate Limits**: None (free tier)
+- **Coverage**: Global markets
 
-### Fallback Logic
+### Alpha Vantage
+- **API**: REST API
+- **Features**: Stock prices, technical indicators
+- **Rate Limits**: 5 requests/minute (free tier)
+- **Coverage**: Global markets
 
-For each symbol and date, the ingestion job:
+## 🐳 Containerization
 
-- **Tries Yahoo Finance first** (up to 3 retries with exponential backoff and jitter).
-- **Falls back to Alpha Vantage** if Yahoo Finance fails or returns insufficient data (also retried).
-- **Logs which source succeeded** and classifies errors (network, missing data, API limit, other).
-- **Ensures that a failure for one symbol/date does not abort the entire run.**
+The application is fully containerized with Docker and Docker Compose, providing:
 
-### Idempotency Strategy
+### Services Included:
+- **FastAPI Service**: Main application server
+- **Redis Service**: Caching layer for improved performance
+- **Database**: Embedded DuckDB with persistent storage
+- **Networking**: Custom bridge network for service communication
 
-- **daily_stock_data** table uses a composite primary key (`symbol`, `date`) to enforce uniqueness.
-- **Idempotent insert logic**: Attempts to insert only if the symbol/date pair does not already exist.
-- **stock_metadata** table is upserted for each symbol, updating company name, exchange, and last_updated timestamp.
+### Features:
+- ✅ **Service Isolation**: Each component runs in its own container
+- ✅ **Data Persistence**: Database and export files persist between restarts
+- ✅ **Health Checks**: Automatic health monitoring for all services
+- ✅ **Environment Configuration**: Easy configuration via environment variables
+- ✅ **Clean Networking**: Services communicate via internal network
+- ✅ **Volume Mounting**: Persistent data storage for database and exports
 
-### Example Usage
+### Docker Production
+```bash
+# Build production image
+docker build -f Dockerfile.fastapi -t stock-index-api .
 
-Run the ingestion job for a date range and a default symbol list:
-
-```sh
-python ingestion/fetcher.py --start-date 2025-07-28 --end-date 2025-08-01
+# Run with environment variables
+docker run -d \
+  -p 8001:8001 \
+  -e ALPHA_VANTAGE_API_KEY=your_key \
+  -e REDIS_URL=redis://redis:6379/0 \
+  stock-index-api
 ```
 
-Or specify a custom symbol file:
+## 🚀 Production Deployment
 
-```sh
-python ingestion/fetcher.py --start-date 2025-07-28 --end-date 2025-08-01 --symbols-file symbols.txt
-```
+### Scaling Considerations
+- **Database**: Consider PostgreSQL for production workloads
+- **Caching**: Use Redis cluster for high availability
+- **Load Balancing**: Use nginx or similar for API load balancing
+- **Monitoring**: Add Prometheus metrics and Grafana dashboards
+- **Logging**: Implement structured logging with ELK stack
 
-### Interpreting the Output
+## 🤝 Contributing
 
-After running, you'll see:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite
+6. Submit a pull request
 
-- **Progress logs** for each symbol and date.
-- **Summary statistics**:
-  - Number of successful and failed fetches.
-  - Breakdown of error types (network, API limit, missing data, other).
-- **Failure report** listing all failed symbol/date pairs and reasons.
-- **Stock metadata table** showing all symbols ingested, their company names, exchanges, and last updated timestamps.
+## 📝 License
 
-This approach ensures robust, repeatable ingestion with clear error reporting and reliable data storage.
+
+
+## 🆘 Support
+
+For questions or issues:
+1. Check the API documentation at `/docs`
+2. Review the test files for usage examples
+3. Open an issue on GitHub
+
+## 🔄 Changelog
+
+### v1.0.0
+- Initial release
+- Complete API implementation
+- Docker support
+- Comprehensive testing suite
+- Excel export functionality
