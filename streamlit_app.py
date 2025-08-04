@@ -148,75 +148,90 @@ def export_data(start_date, end_date):
 
 def create_performance_chart(performance_data):
     """Create a performance chart using Plotly."""
-    if not performance_data.get("success") or not performance_data.get("daily_returns"):
+    try:
+        if not performance_data.get("success") or not performance_data.get("daily_returns"):
+            return None
+        
+        df = pd.DataFrame(performance_data["daily_returns"])
+        
+        # Check if required columns exist
+        required_columns = ['date', 'daily_return', 'cumulative_return']
+        if not all(col in df.columns for col in required_columns):
+            print(f"Missing columns. Available: {list(df.columns)}")
+            return None
+        
+        df['date'] = pd.to_datetime(df['date'])
+        
+        fig = go.Figure()
+        
+        # Cumulative return line
+        fig.add_trace(go.Scatter(
+            x=df['date'],
+            y=df['cumulative_return'],
+            mode='lines+markers',
+            name='Cumulative Return (%)',
+            line=dict(color='#667eea', width=3),
+            marker=dict(size=8)
+        ))
+        
+        # Daily return bars
+        fig.add_trace(go.Bar(
+            x=df['date'],
+            y=df['daily_return'],
+            name='Daily Return (%)',
+            marker_color='#764ba2',
+            opacity=0.7
+        ))
+        
+        fig.update_layout(
+            title="Index Performance Over Time",
+            xaxis_title="Date",
+            yaxis_title="Return (%)",
+            template="plotly_white",
+            height=500,
+            showlegend=True
+        )
+        
+        return fig
+    except Exception as e:
+        print(f"Error creating performance chart: {e}")
         return None
-    
-    df = pd.DataFrame(performance_data["daily_returns"])
-    df['Date'] = pd.to_datetime(df['Date'])
-    
-    fig = go.Figure()
-    
-    # Cumulative return line
-    fig.add_trace(go.Scatter(
-        x=df['Date'],
-        y=df['Cumulative Return (%)'],
-        mode='lines+markers',
-        name='Cumulative Return (%)',
-        line=dict(color='#667eea', width=3),
-        marker=dict(size=8)
-    ))
-    
-    # Daily return bars
-    fig.add_trace(go.Bar(
-        x=df['Date'],
-        y=df['Daily Return (%)'],
-        name='Daily Return (%)',
-        marker_color='#764ba2',
-        opacity=0.7
-    ))
-    
-    fig.update_layout(
-        title="Index Performance Over Time",
-        xaxis_title="Date",
-        yaxis_title="Return (%)",
-        template="plotly_white",
-        height=500,
-        showlegend=True
-    )
-    
-    return fig
 
 def create_composition_chart(composition_data):
     """Create a composition chart using Plotly."""
-    if not composition_data.get("success") or not composition_data.get("stocks"):
+    try:
+        if not composition_data.get("success") or not composition_data.get("stocks"):
+            return None
+        
+        stocks = composition_data["stocks"]
+        symbols = [stock["symbol"] for stock in stocks]
+        weights = [stock["weight"] * 100 for stock in stocks]
+        market_caps = [stock["market_cap"] / 1e12 for stock in stocks]  # Convert to trillions
+        
+        fig = go.Figure()
+        
+        fig.add_trace(go.Bar(
+            x=symbols,
+            y=weights,
+            name='Weight (%)',
+            marker_color='#667eea',
+            text=[f'{w:.1f}%' for w in weights],
+            textposition='auto'
+        ))
+        
+        fig.update_layout(
+            title="Index Composition by Weight",
+            xaxis_title="Stock Symbol",
+            yaxis_title="Weight (%)",
+            template="plotly_white",
+            height=400,
+            showlegend=False
+        )
+        
+        return fig
+    except Exception as e:
+        print(f"Error creating composition chart: {e}")
         return None
-    
-    stocks = composition_data["stocks"]
-    symbols = [stock["symbol"] for stock in stocks]
-    weights = [stock["weight"] * 100 for stock in stocks]
-    market_caps = [stock["market_cap"] / 1e12 for stock in stocks]  # Convert to trillions
-    
-    fig = go.Figure()
-    
-    fig.add_trace(go.Bar(
-        x=symbols,
-        y=weights,
-        name='Weight (%)',
-        marker_color='#667eea',
-        text=[f'{w:.1f}%' for w in weights],
-        textposition='auto'
-    ))
-    
-    fig.update_layout(
-        title="Index Composition by Weight",
-        xaxis_title="Stock Symbol",
-        yaxis_title="Weight (%)",
-        template="plotly_white",
-        height=400,
-        showlegend=False
-    )
-    
-    return fig
 
 # Main application
 def main():
