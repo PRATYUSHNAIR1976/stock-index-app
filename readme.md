@@ -442,28 +442,6 @@ The Streamlit UI provides a professional, user-friendly interface that makes it 
 - **Error Handling**: Robust error handling and user feedback
 - **Documentation**: Complete API documentation and setup guides
 
-## 📸 Screenshots
-
-> **Note**: Screenshots will be added to showcase the Streamlit UI interface, API documentation, and Docker services. The application includes a modern, materialistic design with interactive charts and real-time data visualization.
-
-### Streamlit UI Dashboard
-- **Modern Interface**: Beautiful gradient backgrounds and card layouts
-- **Interactive Charts**: Plotly-powered performance and composition visualizations
-- **Real-time Updates**: Live API integration with status indicators
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-
-### API Documentation
-- **Swagger UI**: Interactive API documentation at `/docs`
-- **Comprehensive Endpoints**: All CRUD operations with examples
-- **Request/Response Models**: Detailed schema documentation
-- **Testing Interface**: Try API endpoints directly from the browser
-
-### Docker Services
-- **Multi-service Architecture**: FastAPI, Redis, and Streamlit containers
-- **Health Monitoring**: Built-in health checks for all services
-- **Data Persistence**: Shared volumes for database and exports
-- **Easy Deployment**: One command to start the entire application
-
 ## 🤝 Contributing
 
 1. Fork the repository
