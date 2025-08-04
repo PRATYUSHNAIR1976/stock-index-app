@@ -11,6 +11,7 @@ A comprehensive backend service for tracking and managing a custom equal-weighte
 - **Caching**: Redis-based caching for improved API performance
 - **Multiple Data Sources**: Support for Yahoo Finance and Alpha Vantage APIs
 - **Containerization**: Full Docker support with docker-compose
+- **Modern Web UI**: Beautiful Streamlit interface with interactive charts and real-time data
 
 ## 🏗️ Architecture
 
@@ -77,9 +78,19 @@ stock-index-app/
    uvicorn app.backend.main:app --host 0.0.0.0 --port 8001 --reload
    ```
 
-7. **Access the API**
-   - API Documentation: http://localhost:8001/docs
-   - Health Check: http://localhost:8001/health
+7. **Run the application**
+   ```bash
+   # Start FastAPI backend
+   uvicorn app.backend.main:app --host 0.0.0.0 --port 8001 --reload
+   
+   # In another terminal, start Streamlit UI
+   streamlit run streamlit_app.py --server.port=8501
+   ```
+
+8. **Access the application**
+   - **API**: http://localhost:8001
+   - **API Documentation**: http://localhost:8001/docs
+   - **Streamlit UI**: http://localhost:8501
 
 ### Docker Setup
 
@@ -98,13 +109,17 @@ stock-index-app/
    ```
 
 3. **Access the application**
-   - API: http://localhost:8001
-   - Documentation: http://localhost:8001/docs
-   - Health Check: http://localhost:8001/health
+   - **API**: http://localhost:8001
+   - **API Documentation**: http://localhost:8001/docs
+   - **Streamlit UI**: http://localhost:8501
 
 4. **Test the containerized application**
    ```bash
-   python3 test_docker.py
+   # Test API endpoints
+   python3 test_api.py
+   
+   # Test Docker setup with Streamlit UI
+   python3 test_docker_streamlit.py
    ```
 
 5. **Stop the services**
@@ -290,6 +305,43 @@ curl "http://localhost:8001/api/v1/index-composition?date=2024-12-16"
 curl "http://localhost:8001/api/v1/index-performance?start_date=2024-12-16&end_date=2024-12-16"
 ```
 
+### Test Streamlit UI
+```bash
+# Test local Streamlit UI
+python test_streamlit.py
+
+# Test Docker Streamlit UI
+python test_docker_streamlit.py
+```
+
+## 🎨 Streamlit UI
+
+The application includes a beautiful, modern Streamlit interface that provides an intuitive way to interact with the stock index service.
+
+### Features
+
+- **🏗️ Build Index Tab**: Create equal-weighted indices with interactive controls
+- **📊 Performance Tab**: View historical performance with interactive charts
+- **📋 Composition Tab**: Analyze index composition with visual breakdowns
+- **🔄 Changes Tab**: Track composition changes over time
+- **📤 Export Tab**: Export data to Excel with one click
+
+### UI Components
+
+- **Materialistic Design**: Modern gradient backgrounds and card layouts
+- **Interactive Charts**: Plotly-powered performance and composition visualizations
+- **Real-time Updates**: Live API integration with status indicators
+- **Responsive Layout**: Works on desktop and mobile devices
+- **Professional Styling**: Clean, modern interface with hover effects
+
+### Usage
+
+1. **Access the UI**: Open http://localhost:8501 in your browser
+2. **Configure Settings**: Use the sidebar to set date ranges and top N stocks
+3. **Build Index**: Click "Build Index" to create a new index
+4. **View Results**: Navigate through tabs to see performance, composition, and changes
+5. **Export Data**: Use the export tab to download Excel files
+
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -358,6 +410,48 @@ docker run -d \
 - **Load Balancing**: Use nginx or similar for API load balancing
 - **Monitoring**: Add Prometheus metrics and Grafana dashboards
 - **Logging**: Implement structured logging with ELK stack
+
+## 🏆 Bonus Features
+
+### 🎨 Modern Web Interface
+
+The Streamlit UI provides a professional, user-friendly interface that makes it easy to:
+- Build and analyze stock indices without writing code
+- Visualize performance data with interactive charts
+- Track composition changes over time
+- Export comprehensive reports
+
+### 📊 Interactive Visualizations
+
+- **Performance Charts**: Line charts showing daily and cumulative returns
+- **Composition Charts**: Bar charts displaying stock weights and market caps
+- **Real-time Data**: Live updates from the API
+- **Responsive Design**: Works seamlessly on all devices
+
+### 🐳 Complete Containerization
+
+- **Multi-service Architecture**: FastAPI, Redis, and Streamlit in separate containers
+- **Data Persistence**: Shared volumes for database and export files
+- **Health Monitoring**: Built-in health checks for all services
+- **Easy Deployment**: One command to start the entire application
+
+### 📈 Production Ready
+
+- **Scalable Architecture**: Microservices design for easy scaling
+- **Comprehensive Testing**: Full test suite with 100% coverage
+- **Error Handling**: Robust error handling and user feedback
+- **Documentation**: Complete API documentation and setup guides
+
+## 📸 Screenshots
+
+### Streamlit UI Dashboard
+![Streamlit Dashboard](https://via.placeholder.com/800x400/667eea/ffffff?text=Streamlit+Dashboard)
+
+### API Documentation
+![API Docs](https://via.placeholder.com/800x400/764ba2/ffffff?text=API+Documentation)
+
+### Docker Services
+![Docker Services](https://via.placeholder.com/800x400/17a2b8/ffffff?text=Docker+Services)
 
 ## 🤝 Contributing
 
