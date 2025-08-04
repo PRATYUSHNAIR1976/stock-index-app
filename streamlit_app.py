@@ -548,7 +548,8 @@ def main():
                 with st.spinner("Exporting data..."):
                     export_result = export_data(start_date_str, end_date_str)
                     
-                    if export_result.get("success"):
+                    # Check if export was successful by looking for file_url
+                    if export_result.get("file_url"):
                         st.markdown(f"""
                         <div class="success-card">
                             <h3>✅ Export Successful!</h3>
@@ -558,7 +559,10 @@ def main():
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        st.info("The Excel file has been generated and is available for download via the API.")
+                        # Add download link
+                        download_url = f"http://localhost:8001{export_result.get('file_url')}"
+                        st.markdown(f"**📥 Download Link:** [Click here to download Excel file]({download_url})")
+                        st.info("The Excel file has been generated successfully!")
                     else:
                         st.markdown(f"""
                         <div class="error-card">
@@ -566,6 +570,10 @@ def main():
                             <p>{export_result.get('error', 'Unknown error')}</p>
                         </div>
                         """, unsafe_allow_html=True)
+                        
+                        # Show debug info
+                        with st.expander("🔍 Debug Information"):
+                            st.json(export_result)
         
         with col2:
             st.markdown("### 📤 Export Features")
