@@ -240,17 +240,21 @@ def main():
         st.sidebar.info("Please ensure the FastAPI service is running on localhost:8001")
         return
     
+    # Data availability info
+    st.sidebar.info("📊 **Available Data**: 2024-12-16")
+    st.sidebar.info("💡 **Tip**: Use 2024-12-16 for testing")
+    
     # Date inputs
     st.sidebar.markdown("### 📅 Date Range")
     start_date = st.sidebar.date_input(
         "Start Date",
-        value=datetime.now() - timedelta(days=7),
+        value=datetime(2024, 12, 16),  # Use date with available data
         max_value=datetime.now()
     )
     
     end_date = st.sidebar.date_input(
         "End Date",
-        value=datetime.now(),
+        value=datetime(2024, 12, 16),  # Use date with available data
         max_value=datetime.now()
     )
     
@@ -288,12 +292,23 @@ def main():
                         </div>
                         """, unsafe_allow_html=True)
                     else:
+                        error_msg = result.get('error', 'Unknown error')
                         st.markdown(f"""
                         <div class="error-card">
                             <h3>❌ Error Building Index</h3>
-                            <p>{result.get('error', 'Unknown error')}</p>
+                            <p><strong>Error:</strong> {error_msg}</p>
+                            <p><strong>Request Details:</strong></p>
+                            <ul>
+                                <li>Start Date: {start_date_str}</li>
+                                <li>End Date: {end_date_str}</li>
+                                <li>Top N: {top_n}</li>
+                            </ul>
                         </div>
                         """, unsafe_allow_html=True)
+                        
+                        # Show debug info
+                        with st.expander("🔍 Debug Information"):
+                            st.json(result)
         
         with col2:
             st.markdown("### 📈 Quick Stats")
@@ -395,7 +410,7 @@ def main():
         # Date selector for composition
         composition_date = st.date_input(
             "Select Date for Composition",
-            value=end_date,
+            value=datetime(2024, 12, 16),  # Use date with available data
             max_value=datetime.now()
         )
         composition_date_str = composition_date.strftime("%Y-%m-%d")
