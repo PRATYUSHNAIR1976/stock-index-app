@@ -22,6 +22,26 @@ services:
       - stock-index-network
     restart: unless-stopped
 
+  # Streamlit UI service
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"  # Streamlit UI port
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    volumes:
+      - ./data:/app/data  # Share data with FastAPI
+      - ./exports:/app/exports  # Share exports with FastAPI
+    depends_on:
+      - fastapi
+    networks:
+      - stock-index-network
+    restart: unless-stopped
+
   # Redis cache service
   redis:
     image: redis:7-alpine
