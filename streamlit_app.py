@@ -35,12 +35,32 @@ st.markdown("""
     }
     
     .metric-card {
-        background: white;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
         padding: 1.5rem;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #ffffff;
         margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .metric-card h4 {
+        color: white;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+    
+    .metric-card p {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 0;
     }
     
     .success-card {
@@ -76,6 +96,24 @@ st.markdown("""
     
     .sidebar .sidebar-content {
         background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .info-card {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tip-card {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -256,8 +294,17 @@ def main():
         return
     
     # Data availability info
-    st.sidebar.info("📊 **Available Data**: 2024-12-16")
-    st.sidebar.info("💡 **Tip**: Use 2024-12-16 for testing")
+    st.sidebar.markdown("""
+    <div class="info-card">
+        <strong>📊 Available Data:</strong> 2024-12-16
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.sidebar.markdown("""
+    <div class="tip-card">
+        <strong>💡 Tip:</strong> Use 2024-12-16 for testing
+    </div>
+    """, unsafe_allow_html=True)
     
     # Date inputs
     st.sidebar.markdown("### 📅 Date Range")
@@ -398,21 +445,21 @@ def main():
             st.markdown("### 📊 Performance Metrics")
             st.markdown("""
             <div class="metric-card">
-                <h4>Total Return</h4>
+                <h4>📈 Total Return</h4>
                 <p>Overall return over the period</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("""
             <div class="metric-card">
-                <h4>Daily Returns</h4>
+                <h4>📊 Daily Returns</h4>
                 <p>Day-by-day performance</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("""
             <div class="metric-card">
-                <h4>Cumulative Returns</h4>
+                <h4>📉 Cumulative Returns</h4>
                 <p>Running total performance</p>
             </div>
             """, unsafe_allow_html=True)
@@ -476,21 +523,21 @@ def main():
             st.markdown("### 📋 Composition Info")
             st.markdown("""
             <div class="metric-card">
-                <h4>Equal Weighting</h4>
+                <h4>⚖️ Equal Weighting</h4>
                 <p>Each stock has equal weight</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("""
             <div class="metric-card">
-                <h4>Market Cap Ranked</h4>
+                <h4>📊 Market Cap Ranked</h4>
                 <p>Stocks ranked by market cap</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("""
             <div class="metric-card">
-                <h4>Daily Rebalancing</h4>
+                <h4>🔄 Daily Rebalancing</h4>
                 <p>Index rebalances daily</p>
             </div>
             """, unsafe_allow_html=True)
@@ -579,21 +626,21 @@ def main():
             st.markdown("### 📤 Export Features")
             st.markdown("""
             <div class="metric-card">
-                <h4>Multiple Sheets</h4>
+                <h4>📊 Multiple Sheets</h4>
                 <p>Performance, Compositions, Summary</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("""
             <div class="metric-card">
-                <h4>Professional Format</h4>
+                <h4>🎨 Professional Format</h4>
                 <p>Clean headers and formatting</p>
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("""
             <div class="metric-card">
-                <h4>Complete Data</h4>
+                <h4>📈 Complete Data</h4>
                 <p>All index data included</p>
             </div>
             """, unsafe_allow_html=True)
